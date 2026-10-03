@@ -25,6 +25,7 @@ Works on **any AI chat website**. ChatGPT, Claude, Gemini, Perplexity, Copilot, 
 - **Copying:** selecting text, or using the site's own copy button, gives the real values.
 - **Paste:** pasted text is cleaned before the site's scripts can read it.
 - **Strict mode** (Settings → Strict mode, experimental): each detail is swapped the moment you finish typing it, instead of on Send.
+- **Natural names** (Settings → *Natural names*, experimental): people are swapped for believable stand-in names instead of `[PERSON_1]`. The stand-in matches the script (Latin, Urdu, Devanagari), likely gender and culture, is always the same for the same person, and is restored to the real name in replies. Other details keep placeholders.
 - **Toolbar icon:** turns VEIL on or off for the current site, and remembers it. Messaging and email sites (WhatsApp, Gmail, Slack…) stay off by default, so messages to people are never altered.
 - **Side panel** (**Alt+Shift+V**, or *Open VEIL panel* in the popup): compose privately, restore any pasted reply, manage your vault and settings.
 
@@ -53,8 +54,11 @@ Everything runs on the user's device: rules, checksums and dictionaries, with no
 | **Money** | Cards (Luhn + issuer), IBAN (mod-97), account numbers, SWIFT/IFSC/sort code/BSB; amounts optional |
 | **Email, IP, date of birth, secrets** | Patterns and context; 20+ API-key formats, passwords in code, URL credentials, high-randomness strings |
 | **Names** | 54,000 given names and 22,000 family names from Wikidata (Latin and Urdu/Arabic scripts), plus clues ("my name is", "Dear", titles, sign-offs). Common English words and city names are excluded. |
-| **Addresses** | South Asian, US/UK and continental formats (Hauptstraße 12, Rue de Rivoli 10) with 38,000 GeoNames cities |
-| **Urdu / Arabic script** | Names from cues (نام، جناب، محترمہ، بھائی، صاحب، میں … ہوں), a built-in list of Urdu given names and surnames, and the Arabic-script names in the dictionaries. Spelling variants match (ي/ی, ك/ک, ه/ہ). Eastern Arabic digits (۰۳۰۰، ٠٣٢١) work in phones, CNIC, accounts and dates. Addresses (مکان نمبر، گلی، محلہ، کالونی، سیکٹر), form labels (نام:، فون:، پتہ:), organizations (…پرائیویٹ لمیٹڈ). Roman Urdu cues too (*mera naam … hai*, *Hamza bhai*, *janab*). |
+| **Addresses** | South Asian, US/UK and continental formats (Hauptstraße 12, Rue de Rivoli 10) with 38,000 GeoNames cities. Also lowercase chat style (*house no 5 street 3 sector G-11/2 islamabad*) and free text: landmarks when someone says where they live (*behind Model Town Park*) and area names (*Bahria Town Phase 2*, *Model Town, Lahore*) |
+| **Urdu and Arabic script** | Names from cues (نام، جناب، محترمہ، بھائی، صاحب، میں … ہوں), about 300 Urdu given names and 100 surnames, and the Arabic-script names in the dictionaries. Spelling variants match (ي/ی, ك/ک, ه/ہ). Punjabi (ناں), Sindhi (نالو), Pashto (نوم) and Arabic (اسمي، السيد) name cues too. Addresses (مکان نمبر، گلی، محلہ، کالونی، سیکٹر), landmarks (… پارک کے پیچھے رہتا ہوں), form labels (نام:، فون:، پتہ:), organizations (…پرائیویٹ لمیٹڈ), ID, date-of-birth and account cues. |
+| **Hindi (Devanagari)** | Names from cues (नाम، श्री، श्रीमती، भैया، जी، मैं … हूँ) and a list of Hindi given names and surnames (nukta and chandrabindu spellings match). Aadhaar, PAN, account, passport, phone and date-of-birth cues, addresses (मकान नंबर, गली, मोहल्ला, सेक्टर), landmarks and form labels. There are no Devanagari names in the dictionaries, so uncommon Hindi names need a cue. |
+| **Roman Urdu / Hinglish** | Lowercase names with a cue: *hamza bhai ko…*, *ayesha ne kaha*, *main bilal hun*, *naam hamza tariq hai*, *salam hamza*, *mera dost imran*. Names that are also everyday words (*sara*, *kamal*, *noor*) need a stronger cue. |
+| **Usernames** | `@handles`, and *instagram …*, *telegram username …*, *github: …*. Code decorators and package names (`@Override`, `@types/node`) are left alone. |
 | **Structure** | `Name: …` forms, JSON/YAML keys, `.env` files, CSV/TSV/Markdown tables with name/email/phone columns |
 | **Learning** | Anything protected once is recognised everywhere afterwards, including a known first name on its own and one-letter typos ("Tayab"). VEIL never asks for your details. |
 | **Sensitive topics** | Health, mental health, sexuality, belief, legal, financial and immigration topics *about a person* get a wavy amber underline. They are flagged, never replaced. |
@@ -71,6 +75,10 @@ Rebuild the dictionaries with `python3 tools/build-dictionaries.py <raw-data-dir
 - **Never written into editors.** Real values are never restored into a text box, so they can't be re-sent by accident.
 
 ### Limits
+
+- **Natural names** replace words the page may also use elsewhere: if a stand-in first name appears in the site's own text (a sidebar title, say), VEIL shows the real name there too while that mapping exists. Placeholders never have this problem, so they stay the default.
+- Uncommon names with no cue and not in any list (*Zorblax went home*) can still be missed; add them under **Vault → Always protect**.
+- Famous people are treated as names. Add them to **Never protect** if the AI needs them.
 
 - Restoring real values in the page means the site's scripts *could* read them from the page. For the strictest setup, turn off **Show real values in replies** in Settings and read replies in the Restore tab.
 - In the default mode, the site can see keystrokes before you press Send. Strict mode shortens that window to the moment you finish each detail.
@@ -91,7 +99,9 @@ lib/detect.js        detector with confidence scores (sync; <5 ms per prompt)
 lib/phone.js         worldwide phone numbers (libphonenumber metadata, lib/vendor)
 lib/ids.js           40+ national ID formats with checksums
 lib/topics.js        sensitive-topic flags
-lib/urdu.js          Urdu / Arabic-script names, addresses, digits and form labels
+lib/urdu.js          Urdu / Arabic-script rules, Roman Urdu names, digits, and the language engine shared with Hindi
+lib/hindi.js         Hindi (Devanagari) names, addresses, IDs and form labels
+lib/fakenames.js     stand-in names for natural-names mode
 lib/dict.js          name/place dictionaries (lib/data, built by tools/)
 lib/tokens.js        substitution + tolerant restoration
 lib/vault.js         encrypted storage
@@ -111,3 +121,11 @@ tests/               node --test tests/*.test.js
 ```
 node --test tests/*.test.js
 ```
+
+## Tests
+
+```
+npm test
+```
+
+The suite runs on Node 20+ with no dependencies (`tests/`). It covers each detector, Urdu/Hindi/Roman Urdu rules, a corpus of realistic prompts and clean prompts, natural names, that the extension's script lists agree, and that the libraries load as classic browser scripts. GitHub Actions runs it on every pull request.

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "VEIL — Private AI",
   "short_name": "VEIL",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Replaces your private details with placeholders before they reach any AI chat, and restores them locally in the replies.",
   "minimum_chrome_version": "116",
   "icons": {

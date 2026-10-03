@@ -129,3 +129,10 @@ npm test
 ```
 
 The suite runs on Node 20+ with no dependencies (`tests/`). It covers each detector, Urdu/Hindi/Roman Urdu rules, a corpus of realistic prompts and clean prompts, natural names, that the extension's script lists agree, and that the libraries load as classic browser scripts. GitHub Actions runs it on every pull request.
+
+```
+npm install
+npm run e2e
+```
+
+The end-to-end tests (`tests/e2e/`) start a real Chromium with VEIL loaded as an unpacked extension and a fake AI chat site. They check that the "AI" never receives a real value, that replies show the real values again, and that paste, rich-text boxes, Urdu/Hindi names, natural names and per-site switches work. They need Chromium: set `CHROMIUM_PATH`, or run `npx playwright-core install chromium` first.

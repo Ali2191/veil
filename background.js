@@ -1,7 +1,7 @@
 /* VEIL — service worker. Owns the encrypted vault and assigns placeholders.
    No network access: the only fetch() reads VEIL's own packaged dictionary files
    (the extension CSP allows 'self' only). */
-importScripts('lib/types.js', 'lib/names.js', 'lib/vendor/libphonenumber-max.js', 'lib/phone.js', 'lib/ids.js', 'lib/topics.js', 'lib/urdu.js',
+importScripts('lib/types.js', 'lib/names.js', 'lib/vendor/libphonenumber-max.js', 'lib/phone.js', 'lib/ids.js', 'lib/topics.js', 'lib/urdu.js', 'lib/hindi.js', 'lib/fakenames.js',
   'lib/dict.js', 'lib/detect.js', 'lib/tokens.js', 'lib/sites.js', 'lib/settings.js', 'lib/vault.js');
 
 const T = VeilTypes;
@@ -30,7 +30,7 @@ function knownValues() {
   return vault.list().slice(0, 3000).map((e) => ({ type: e.type, value: e.value }));
 }
 function detectOptions(s) {
-  return { types: s.types, terms: vault.data.terms, allow: vault.data.allow, known: knownValues(), dict, home: HOME };
+  return { types: s.types, terms: vault.data.terms, allow: vault.data.allow, known: knownValues(), aliases: vault.aliasTable().map((a) => a.text), dict, home: HOME };
 }
 
 const ready = (async () => {
@@ -93,9 +93,12 @@ async function sanitize({ text, exclude = [], commit = false, hint = false, tabI
   const skip = new Set(exclude);
   const pending = new Map();
   const tokens = new Map();
+  const ctx = vault.aliasContext(text, s.naturalNames);
+  let usedPlaceholder = false;
   const res = VeilTokens.substitute(text, spans, (sp) => {
     if (skip.has(sp.key)) return null;
-    const tok = vault.tokenFor(sp, commit, pending);
+    const tok = vault.tokenFor(sp, commit, pending, ctx);
+    if (tok.startsWith('[')) usedPlaceholder = true;
     tokens.set(sp.key, tok);
     return tok;
   });
@@ -104,7 +107,7 @@ async function sanitize({ text, exclude = [], commit = false, hint = false, tabI
     await vault.save();
     bumpBadge(tabId, res.items.length);
     notify();
-    if (hint && s.hint && (await shouldHint(tabId))) out += HINT;
+    if (hint && s.hint && usedPlaceholder && (await shouldHint(tabId))) out += HINT;
   }
   // Report every detection (including excluded ones) so the UI can toggle them.
   const items = spans.map((sp) => ({ start: sp.start, end: sp.end, type: sp.type, value: sp.value, key: sp.key, tier: sp.tier, score: sp.score, token: tokens.get(sp.key) || null }));
@@ -114,7 +117,7 @@ async function sanitize({ text, exclude = [], commit = false, hint = false, tabI
 const handlers = {
   async dict() { return { raw: dictRaw, home: HOME }; },
   async state() {
-    return { lookup: vault.lookupTable(), terms: vault.data.terms, allow: vault.data.allow };
+    return { lookup: vault.lookupTable(), aliases: vault.aliasTable(), terms: vault.data.terms, allow: vault.data.allow };
   },
   async sanitize(msg, sender) {
     const tabId = Number.isInteger(msg.tabId) ? msg.tabId : sender.tab?.id;
@@ -123,9 +126,11 @@ const handlers = {
   // Strict mode: placeholders for individual values as they are typed.
   async tokenize({ items }, sender) {
     const pending = new Map();
+    const s = await VeilSettings.get();
+    const ctx = vault.aliasContext((items || []).map((it) => (it && it.value) || '').join(' '), s.naturalNames);
     const tokens = (items || []).map((it) => {
       if (!it || !T.TYPES[it.type] || typeof it.value !== 'string' || !it.value.trim()) return null;
-      return vault.tokenFor({ type: it.type, value: it.value, key: T.keyOf(it.type, it.value) }, true, pending);
+      return vault.tokenFor({ type: it.type, value: it.value, key: T.keyOf(it.type, it.value) }, true, pending, ctx);
     });
     if (tokens.some(Boolean)) {
       await vault.save();
@@ -136,7 +141,7 @@ const handlers = {
   },
   async restore({ text }) {
     const table = vault.lookupTable();
-    return VeilTokens.restore(text, (k) => table[k]);
+    return VeilTokens.restore(text, (k) => table[k], vault.aliasTable());
   },
   async vaultList() {
     return { entries: vault.list(), terms: vault.data.terms, allow: vault.data.allow };

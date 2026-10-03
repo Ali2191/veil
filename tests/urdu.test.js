@@ -110,3 +110,46 @@ test('ordinary Urdu text produces no detections', () => {
   ];
   for (const t of CLEAN) assert.deepEqual(found(t), [], t);
 });
+
+test('Roman Urdu: lowercase names need a cue', () => {
+  has('hamza bhai ko bol dena ke kal aa jaye', 'PERSON', 'hamza');
+  has('ayesha ne kaha ke wo late aye gi', 'PERSON', 'ayesha');
+  has('main bilal hun aur lahore mein rehta hun', 'PERSON', 'bilal');
+  has('meri behan sana ki shadi hai', 'PERSON', 'sana');
+  has('salam hamza kya haal hai', 'PERSON', 'hamza');
+  has('naam hamza tariq hai', 'PERSON', 'hamza tariq');
+  has('mera naam ayesha hai', 'PERSON', 'ayesha');
+  has('muhammad usman ko message karo', 'PERSON', 'muhammad usman');
+  has('kamran sahab ka number do', 'PERSON', 'kamran');
+  has('mera dost imran kal aa raha hai', 'PERSON', 'imran');
+});
+
+test('Roman Urdu: ordinary chat stays untouched', () => {
+  for (const t of [
+    'mera bhai kal aa raha hai', 'sara kaam khatam ho gaya', 'kamal hai yaar kya baat hai', 'noor ki raftar kitni hai',
+    'kal class hai aur monday ko orientation', 'wo bhai kidhar hai', 'bara bhai ghar pe hai', 'chota bhai school gaya hai',
+    'tum sab ko bata do', 'aaj ka weather kaisa hai', 'sir ko bol do ke kal aaoon ga', 'baji ne khana banaya',
+    'mujhe jaan se pyara hai woh', 'hi bro kya haal hai', 'dear sir please check',
+  ]) assert.deepEqual(found(t), [], t);
+});
+
+test('free-text addresses: landmarks and area names', () => {
+  has('I moved near the old mill behind Model Town Park in Lahore.', 'ADDRESS', 'Model Town Park in Lahore');
+  has('we live near Dolmen Mall Clifton', 'ADDRESS', 'Dolmen Mall');
+  has('my house is in Bahria Town Phase 2', 'ADDRESS', 'Bahria Town Phase 2');
+  has('Send it to Gulshan-e-Iqbal Block 13 please', 'ADDRESS', 'Gulshan-e-Iqbal Block 13');
+  has('Visit Model Town, Lahore for the office address.', 'ADDRESS', 'Model Town, Lahore');
+  has('she lives next to the Faisal Mosque', 'ADDRESS', 'Faisal Mosque');
+  has('Packages Mall ke saamne rehta hun', 'ADDRESS', 'Packages Mall');
+  has('میں ماڈل ٹاؤن پارک کے پیچھے رہتا ہوں', 'ADDRESS', 'ماڈل ٹاؤن پارک');
+  has('ہمارا دفتر سروس ہسپتال کے قریب ہے', 'ADDRESS', 'سروس ہسپتال');
+});
+
+test('free-text addresses: public places and generic words stay untouched', () => {
+  for (const t of [
+    'We visited Central Park last summer and loved Cape Town.', 'The Town Hall meeting is on Friday.', 'Meet me at the Hyde Park corner tomorrow.',
+    'He works near the Google office in Mountain View.', 'Block 5 of the dataset is corrupted.', 'The Sector report shows growth in Energy Sector.',
+    'Our Housing Scheme proposal was approved by the board.', 'Phase 2 of the project starts Monday.',
+    'پارک کے پیچھے بچے کھیل رہے ہیں', 'مسجد کے ساتھ کھانا کھایا', 'ہسپتال کے سامنے سڑک بند ہے',
+  ]) assert.deepEqual(found(t), [], t);
+});

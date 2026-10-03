@@ -1,7 +1,7 @@
 /* VEIL — service worker. Owns the encrypted vault and assigns placeholders.
    No network access: the only fetch() reads VEIL's own packaged dictionary files
    (the extension CSP allows 'self' only). */
-importScripts('lib/types.js', 'lib/names.js', 'lib/vendor/libphonenumber-max.js', 'lib/phone.js', 'lib/ids.js', 'lib/topics.js',
+importScripts('lib/types.js', 'lib/names.js', 'lib/vendor/libphonenumber-max.js', 'lib/phone.js', 'lib/ids.js', 'lib/topics.js', 'lib/urdu.js',
   'lib/dict.js', 'lib/detect.js', 'lib/tokens.js', 'lib/sites.js', 'lib/settings.js', 'lib/vault.js');
 
 const T = VeilTypes;

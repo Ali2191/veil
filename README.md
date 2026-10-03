@@ -54,6 +54,7 @@ Everything runs on the user's device: rules, checksums and dictionaries, with no
 | **Email, IP, date of birth, secrets** | Patterns and context; 20+ API-key formats, passwords in code, URL credentials, high-randomness strings |
 | **Names** | 54,000 given names and 22,000 family names from Wikidata (Latin and Urdu/Arabic scripts), plus clues ("my name is", "Dear", titles, sign-offs). Common English words and city names are excluded. |
 | **Addresses** | South Asian, US/UK and continental formats (Hauptstraße 12, Rue de Rivoli 10) with 38,000 GeoNames cities |
+| **Urdu / Arabic script** | Names from cues (نام، جناب، محترمہ، بھائی، صاحب، میں … ہوں), a built-in list of Urdu given names and surnames, and the Arabic-script names in the dictionaries. Spelling variants match (ي/ی, ك/ک, ه/ہ). Eastern Arabic digits (۰۳۰۰، ٠٣٢١) work in phones, CNIC, accounts and dates. Addresses (مکان نمبر، گلی، محلہ، کالونی، سیکٹر), form labels (نام:، فون:، پتہ:), organizations (…پرائیویٹ لمیٹڈ). Roman Urdu cues too (*mera naam … hai*, *Hamza bhai*, *janab*). |
 | **Structure** | `Name: …` forms, JSON/YAML keys, `.env` files, CSV/TSV/Markdown tables with name/email/phone columns |
 | **Learning** | Anything protected once is recognised everywhere afterwards, including a known first name on its own and one-letter typos ("Tayab"). VEIL never asks for your details. |
 | **Sensitive topics** | Health, mental health, sexuality, belief, legal, financial and immigration topics *about a person* get a wavy amber underline. They are flagged, never replaced. |
@@ -90,6 +91,7 @@ lib/detect.js        detector with confidence scores (sync; <5 ms per prompt)
 lib/phone.js         worldwide phone numbers (libphonenumber metadata, lib/vendor)
 lib/ids.js           40+ national ID formats with checksums
 lib/topics.js        sensitive-topic flags
+lib/urdu.js          Urdu / Arabic-script names, addresses, digits and form labels
 lib/dict.js          name/place dictionaries (lib/data, built by tools/)
 lib/tokens.js        substitution + tolerant restoration
 lib/vault.js         encrypted storage

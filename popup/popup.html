@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>VEIL</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v6c0 4.2-3 7.6-7 9-4-1.4-7-4.8-7-9V6l7-3z"/><path d="M9 12h6"/></svg>
+      <span>VEIL</span>
+    </div>
+    <span id="count" class="count"></span>
+  </header>
+
+  <section class="site">
+    <label class="row" id="row">
+      <span class="info">
+        <span id="host" class="host">…</span>
+        <span id="status" class="status"></span>
+      </span>
+      <span class="switch"><input id="toggle" type="checkbox" aria-label="Protect this site"><span></span></span>
+    </label>
+    <button id="reload" class="link" hidden>Reload page</button>
+  </section>
+
+  <footer>
+    <button id="panel" class="btn">Open VEIL panel</button>
+    <button id="resume" class="btn ghost" hidden>Resume VEIL everywhere</button>
+  </footer>
+
+  <script src="../lib/types.js"></script>
+  <script src="../lib/settings.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

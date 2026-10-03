@@ -1,0 +1,20 @@
+/* VEIL highlights — drawn with the CSS Custom Highlight API, so the page's DOM is never changed. */
+
+/* Details being protected while typing, and values restored in replies: soft green. */
+::highlight(veil-typing),
+::highlight(veil-restored) {
+  background-color: rgba(16, 185, 129, 0.22);
+}
+
+/* Less certain detections: still protected, lighter with a dotted underline. */
+::highlight(veil-check) {
+  background-color: rgba(16, 185, 129, 0.1);
+  text-decoration: underline dotted rgba(16, 185, 129, 0.9);
+  text-underline-offset: 3px;
+}
+
+/* Sensitive topics: flagged, never swapped. */
+::highlight(veil-topic) {
+  text-decoration: underline wavy rgba(217, 119, 6, 0.85);
+  text-underline-offset: 3px;
+}

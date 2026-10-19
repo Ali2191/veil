@@ -171,3 +171,17 @@ test('relationship cue catches a lone first name', () => {
   has('Please write a note to my manager, Zubair, about leave.', 'PERSON', 'Zubair', o);
   none('My friend Python is great.', o);
 });
+
+test('a learned phone number keeps its leading + (no "++92" after restore)', () => {
+  const text = 'Her number is +92 321 7654321. Write one sentence.';
+  const known = [{ type: 'PHONE', value: '+92 321 7654321' }];
+  const spans = detect(text, { types: T.TYPE_KEYS, known });
+  const p = spans.find((s) => s.type === 'PHONE');
+  assert.equal(text.slice(p.start, p.end), '+92 321 7654321');
+});
+
+test('an organization placeholder does not swallow the sentence-ending period', () => {
+  const text = 'Ayesha Malik works at Acme Corp. Her email is x@example.com';
+  const org = detect(text, { types: T.TYPE_KEYS }).find((s) => s.type === 'ORG');
+  assert.equal(text.slice(org.start, org.end), 'Acme Corp');
+});

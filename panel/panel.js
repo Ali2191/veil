@@ -87,7 +87,7 @@
   const input = $('#input');
   const hl = $('#hl');
 
-  function detectOpts() { return { types: settings.types, terms: state.terms, allow: state.allow, known, dict, home }; }
+  function detectOpts() { return { types: settings.types, terms: state.terms, allow: state.allow, known, aliases: (state.aliases || []).map((a) => a.text), dict, home }; }
 
   function autosize() {
     input.style.height = 'auto';
@@ -377,6 +377,7 @@
       toggle('Enabled', 'Pause VEIL everywhere without uninstalling.', settings.enabled, (v) => save({ enabled: v })),
       toggle('Protect pasted text', 'Clean clipboard text before the site can read it.', settings.pasteGuard, (v) => save({ pasteGuard: v })),
       toggle('Check messages before sending', 'Swaps private details for placeholders when you press Send.', settings.sendGuard, (v) => save({ sendGuard: v })),
+      toggle('Natural names (experimental)', 'Swap people for believable stand-in names (matching script, gender and culture) instead of [PERSON_1]. Other details still use placeholders.', settings.naturalNames, (v) => save({ naturalNames: v })),
       toggle('Strict mode', 'Swap each detail the moment you finish typing it, so the site never holds it in the text box. Experimental.', settings.strict, (v) => save({ strict: v })),
       toggle('Show real values in replies', 'Off keeps placeholders on the page; read replies in Restore instead.', settings.restoreInPage, (v) => save({ restoreInPage: v })),
       toggle('Highlight restored values', null, settings.highlight, (v) => save({ highlight: v })),
@@ -420,6 +421,7 @@
 
   async function loadState() {
     try { state = await bg({ type: 'state' }); } catch {}
+    if (window.VeilTokens) VeilTokens.setAliases(state.aliases || []);
     known = Object.entries(state.lookup || {}).map(([k, v]) => ({ type: k.slice(0, k.lastIndexOf('_')), value: v })).filter((x) => T.TYPES[x.type]);
     refresh(true);
     if (!$('#view-vault').hidden) renderVault();

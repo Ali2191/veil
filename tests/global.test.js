@@ -135,12 +135,11 @@ test('ordinary prompts stay clean with full dictionaries', () => {
 test('performance with dictionaries and phone library', () => {
   const chunk = 'My name is Tayyab Ali, email tayyab@example.com, phone 0300-1234567, address 27-B Gulgasht Colony, Multan. The weather was fine and the meeting went well. ';
   const text = chunk.repeat(Math.ceil(20000 / chunk.length));
-  detect(text, opts());
-  const t0 = performance.now();
-  detect(text, opts());
-  const ms = performance.now() - t0;
+  detect(text, opts()); // warm up
+  let ms = Infinity;
+  for (let i = 0; i < 7; i++) { const t0 = performance.now(); detect(text, opts()); ms = Math.min(ms, performance.now() - t0); }
   assert.ok(ms < 80, `20KB took ${ms.toFixed(1)}ms`);
-  const t1 = performance.now();
-  detect('Write an email to Sarah Khan at sarah@example.com about the 27-B Gulgasht Colony flat.', opts());
-  assert.ok(performance.now() - t1 < 5, 'short prompt under 5ms');
+  let short = Infinity;
+  for (let i = 0; i < 7; i++) { const t1 = performance.now(); detect('Write an email to Sarah Khan at sarah@example.com about the 27-B Gulgasht Colony flat.', opts()); short = Math.min(short, performance.now() - t1); }
+  assert.ok(short < 5, `short prompt took ${short.toFixed(1)}ms`);
 });

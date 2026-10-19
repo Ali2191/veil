@@ -17,6 +17,7 @@
 
   let settings = { ...VeilSettings.DEFAULTS };
   let lookup = {};              // "PERSON_1" → value
+  let aliasTexts = [];          // stand-in names given out in natural-names mode (protected, restored in replies)
   let tokenByKey = new Map();   // normalized key → "[PERSON_1]"
   let terms = [], allow = [];
   let known = [];               // values protected before, detected wherever they reappear
@@ -91,6 +92,8 @@
       const [st, d] = await Promise.all([call({ type: 'state' }), dict ? null : call({ type: 'dict' })]);
       if (d && d.raw) { dict = VeilDict.build(d.raw); home = d.home || []; }
       lookup = st.lookup; terms = st.terms; allow = st.allow;
+      aliasTexts = (st.aliases || []).map((a) => a.text);
+      VeilTokens.setAliases(st.aliases || []);
       tokenByKey = new Map();
       known = [];
       for (const [k, v] of Object.entries(lookup)) {
@@ -105,7 +108,7 @@
     } catch { /* worker waking up; the next change event retries */ }
   }
 
-  const detectOpts = () => ({ types: settings.types, terms, allow, known, dict, home });
+  const detectOpts = () => ({ types: settings.types, terms, allow, known, aliases: aliasTexts, dict, home });
   const look = (k) => lookup[k];
 
   chrome.storage.local.get('settings').then(({ settings: s }) => {
@@ -737,7 +740,7 @@
   function restoreHtml(html) {
     return html.replace(/>([^<]*)</g, (all, txt) => {
       if (!VeilTokens.mightContainToken(txt)) return all;
-      const r = VeilTokens.restore(txt, (k) => (lookup[k] === undefined ? undefined : escHtml(lookup[k])));
+      const r = VeilTokens.restore(txt, (k) => (lookup[k] === undefined ? undefined : escHtml(lookup[k])), undefined, escHtml);
       return `>${r.text}<`;
     });
   }

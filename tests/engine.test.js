@@ -164,3 +164,10 @@ test('performance: 50KB in under 60ms', () => {
   const ms = performance.now() - t0;
   assert.ok(ms < 60, `took ${ms.toFixed(1)}ms`);
 });
+
+test('relationship cue catches a lone first name', () => {
+  const o = { types: T.TYPE_KEYS };
+  has('I was diagnosed last year and my wife Fatima is worried.', 'PERSON', 'Fatima', o);
+  has('Please write a note to my manager, Zubair, about leave.', 'PERSON', 'Zubair', o);
+  none('My friend Python is great.', o);
+});

@@ -62,6 +62,8 @@ Rebuild the dictionaries with `python3 tools/build-dictionaries.py <raw-data-dir
 
 ## Privacy and security
 
+Full policy: [PRIVACY.md](PRIVACY.md).
+
 - **Everything is local.** The extension's CSP is `connect-src 'self'`: VEIL can only read its own packaged files (the dictionaries) and cannot contact any server.
 - **Encrypted vault.** Mappings and your "always protect" list are AES-GCM encrypted in `chrome.storage.local`. The key is a non-extractable WebCrypto key held in IndexedDB.
 - **Permissions:** `storage`, `sidePanel` and `contextMenus`, plus content scripts on all sites so VEIL can protect any AI chat. On pages without an AI chat box, VEIL stays inactive: it doesn't watch the page and doesn't load your vault into it.
